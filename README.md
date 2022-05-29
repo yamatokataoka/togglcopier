@@ -1,2 +1,2 @@
 # togglcopier
-Copy Toggl Track time entries.
+Copy all time entries at the day after tomorrow to the next day of that.
