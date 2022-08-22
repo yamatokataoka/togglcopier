@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -137,23 +139,38 @@ func cleanPastTimeEntries(pastTimeEntries []map[string]interface{}) []map[string
 }
 
 func main() {
-	log.Println("Copy all time entries at the day after tomorrow to the next day of that.")
+	var (
+		dayToShift int
+		err error
+	)
+	if len(os.Args) < 2 {
+		dayToShift = 2
+	} else if len(os.Args) == 2 {
+		dayToShift, err = strconv.Atoi(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Fatal("Too many arguments.")
+	}
+
+	log.Printf("Copy all time entries at the day shifted %v days from today to the next day.", dayToShift)
 
 	loc, err := time.LoadLocation(TimeZone)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dayAfterTomorrow := time.Now().AddDate(0, 0, +2).In(loc)
+	dayToCopy := time.Now().AddDate(0, 0, +dayToShift).In(loc)
 
 	client := NewClient(ApiUrl, Token)
 
-	existedTimeEntries, err := client.GetOneDayTimeEntries(dayAfterTomorrow)
+	existedTimeEntries, err := client.GetOneDayTimeEntries(dayToCopy)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Found %v time entries at %v", len(existedTimeEntries), dayAfterTomorrow.Format("January 02, 2006"))
+	log.Printf("Found %v time entries at %v", len(existedTimeEntries), dayToCopy.Format("January 02, 2006"))
 
 	cleanedPastTimeEntries := cleanPastTimeEntries(existedTimeEntries)
 
