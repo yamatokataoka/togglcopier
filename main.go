@@ -14,9 +14,10 @@ import (
 
 const (
 	Token           = "Toggl Track Token"
-	ApiUrl          = "https://api.track.toggl.com/api/v8"
+	ApiUrl          = "https://api.track.toggl.com/api/v9"
 	TimeEntriesPath = "time_entries"
 	TimeZone        = "Time Zone"
+	WorkspaceId     = "workspace_id"
 )
 
 type Client struct {
@@ -60,7 +61,7 @@ func (c *Client) GetOneDayTimeEntries(oneDay time.Time) ([]map[string]interface{
 		"end_date":   endOfDay(oneDay).Format(time.RFC3339),
 	}
 
-	res, err := c.do(http.MethodGet, TimeEntriesPath, params, nil)
+	res, err := c.do(http.MethodGet, fmt.Sprintf("%s/%s", "me", TimeEntriesPath), params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -96,15 +97,11 @@ func (c *Client) CreateTimeEntries(timeEntries []map[string]interface{}) error {
 		timeEntry["start"] = nextDay(startTime)
 		timeEntry["stop"] = nextDay(stopTime)
 
-		timeEntryToSend := map[string]interface{}{
-			"time_entry": timeEntry,
-		}
-
-		b, err := json.Marshal(timeEntryToSend)
+		b, err := json.Marshal(timeEntry)
 		if err != nil {
 			return err
 		}
-		res, err := c.do(http.MethodPost, TimeEntriesPath, nil, b)
+		res, err := c.do(http.MethodPost, fmt.Sprintf("%s/%s/%s", "workspaces", WorkspaceId, TimeEntriesPath), nil, b)
 		if err != nil {
 			return err
 		}
