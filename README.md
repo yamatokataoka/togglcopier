@@ -3,7 +3,7 @@ Copy all time entries at the day after tomorrow to the next day of that.
 
 # How to run
 
-Please replace `Token` and `TimeZone` in const variables.
+Please replace `Token`, `TimeZone` and `WorkspaceId` in const variables.
 
 Then, run `go run main.go`.
 
